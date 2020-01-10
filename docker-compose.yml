@@ -1,0 +1,51 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    restart: always
+    networks: 
+      main:
+        aliases:
+          - postgres
+  telegram_bot:
+    build: ./bot
+    ports: 
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./ssl:/ssl
+    networks: 
+      main:
+        aliases:
+          - telegram_bot
+    restart: always
+  backend:
+    build: ./backend
+    ports: 
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/backend
+    networks: 
+      main:
+        aliases:
+          - backend
+    restart: always
+  nginx:
+    image: nginx:latest
+    expose:
+      - 80
+      - 443
+    ports: 
+      - "80:80"
+      - "443:443"
+    networks:
+      main:
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./ssl:/etc/nginx/ssl
+    restart: always
+  networks:
+    main:
